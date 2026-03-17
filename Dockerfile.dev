@@ -1,0 +1,19 @@
+FROM node:20-alpine
+
+# 컨테이너 내부 작업 디렉토리 지정
+WORKDIR /app
+
+# package.json과 package-lock.json을 컨테이너로 복사
+COPY package*.json ./
+
+# 의존성 설치
+RUN npm install
+
+# 소스 전체 복사 (실시간 변경 가능하도록 volume 사용)
+COPY . .
+
+# 3030 포트 오픈
+EXPOSE 3030
+
+# dev 모드로 실행 (hot reload)
+CMD ["npm", "run", "start:dev"]

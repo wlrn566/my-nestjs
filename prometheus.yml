@@ -1,0 +1,8 @@
+global:
+  scrape_interval: 15s # 15초마다 메트릭 수집
+
+scrape_configs:
+  - job_name: 'nestjs-app'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['nest:3030'] # compose 네트워크 내에서 서비스 이름과 포트로 지정

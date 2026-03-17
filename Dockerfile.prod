@@ -1,0 +1,30 @@
+FROM node:20-alpine AS builder
+
+# 컨테이너 내부 작업 디렉토리 지정
+WORKDIR /app
+
+# package.json과 package-lock.json을 컨테이너로 복사
+COPY package*.json ./
+
+# 의존성 설치
+RUN npm install
+
+# 소스 코드 전체를 컨테이너로 복사
+COPY . .
+
+# 빌드
+RUN npm run build
+
+FROM node:20-alpine
+
+WORKDIR /app
+# dist 폴더만 복사
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/package*.json ./
+# devDependencies는 제외하고 production dependencies만 설치
+RUN npm install --only=production
+
+# 컨테이너 내부 3030 포트를 외부로 노출
+EXPOSE 3030
+
+CMD ["node", "dist/main.js"]
