@@ -13,6 +13,7 @@ async function bootstrap() {
   app.useWebSocketAdapter(new IoAdapter(app));
 
   // HTTP 서버는 3030 포트, WebSocket 서버는 ChatGateway에서 3031 포트 사용
-  await app.listen(3030);
+  // await app.listen(3030);
+  await app.listen(4445);
 }
 bootstrap();
