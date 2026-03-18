@@ -14,9 +14,9 @@ on:
 # 기본적으로 각 Job들은 병렬로 실행됨
 # needs: 작업간 순서를 정할 수 있음 ex) 빌드 및 테스트 -> 배포
 jobs:
-	# [1단계] 빌드 및 테스트 단계: 'build-and-test'라는 이름의 작업을 정의
+  # [1단계] 빌드 및 테스트 단계: 'build-and-test'라는 이름의 작업을 정의
   build-and-test:
-    # 실행 환경: GitHub에서 제공하는 최신 우분투 리눅스 서버 사용. 가장 빠르고 저렴
+  # 실행 환경: GitHub에서 제공하는 최신 우분투 리눅스 서버 사용. 가장 빠르고 저렴
     runs-on: ubuntu-latest
 
     # 작업 내부의 상세 단계(Step)
