@@ -6,7 +6,6 @@ import { PrometheusModule } from '@willsoto/nestjs-prometheus';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { MetricsInterceptor } from './metrics/metrics.interceptor';
 import { ChatModule } from './chat/chat.module'; // WebSocket 채팅 모듈
-import { ClientsModule, Transport } from '@nestjs/microservices';
 import { OrderModule } from './order/order.module';
 
 /**
@@ -16,7 +15,6 @@ import { OrderModule } from './order/order.module';
  * - MetricsModule    : Prometheus 커스텀 메트릭
  * - PrometheusModule : /metrics 엔드포인트 및 기본 메트릭
  * - ChatModule       : WebSocket 채팅 게이트웨이
- * - ClientsModule    : Kafka 마이크로서비스 클라이언트 설정
  */
 @Module({
   imports: [
@@ -31,21 +29,7 @@ import { OrderModule } from './order/order.module';
       path: '/metrics',
     }),
     ChatModule, // WebSocket 채팅 모듈 등록
-    ClientsModule.register([
-      {
-        name: 'KAFKA_SERVICE',
-        transport: Transport.KAFKA,
-        options: {
-          client: {
-            clientId: 'nestjs-kafka-client',
-            brokers: ['localhost:9092'],
-          },
-          consumer: {
-            groupId: 'notification-producer-group'
-          }
-        }
-      },
-    ]), OrderModule,
+    OrderModule,
   ],
   controllers: [AppController],
   providers: [
