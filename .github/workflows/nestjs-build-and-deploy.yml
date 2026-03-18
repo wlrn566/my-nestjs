@@ -89,7 +89,7 @@ jobs:
           # key: ${{ secrets.SERVER_KEY }}  # .pem 키파일을 사용할 경우
           # port: 22                        # 포트 기본값 22
           source: "./*"                     # 로컬의 모든 파일을
-          target: "/home/mainspace/dev/test-api" # 서버의 이 디렉토리에 옮기겠다.
+          target: "/home/dev/test-api" # 서버의 이 디렉토리에 옮기겠다.
           rm: true                          # 전송 전 기존 파일 삭제 (선택 사항)
 
       # 서버 접속 후 빌드 (SSH)
@@ -100,8 +100,8 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           password: ${{ secrets.SERVER_PASSWORD }}
           script: |
-            cd /home/mainspace/dev/test-api  # 지정한 디렉토리로 이동
+            cd /home/dev/test-api  # 지정한 디렉토리로 이동
             docker build -t test-app .
             docker stop test-app || true
             docker rm test-app || true
-            docker run -d --name test-app -p 4445:4445 test-app
+            docker run -d --name test-app -p 3333:3333 test-app
