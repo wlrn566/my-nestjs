@@ -1,0 +1,79 @@
+# 1. 워크플로우의 이름 (GitHub Actions 탭에 표시됨)
+name: NestJS Continuous Integration
+
+# 2. 언제 이 자동화를 실행할지 정의 (트리거)
+on:
+  push:
+    branches: [ "main" ]    # main 브랜치에 코드가 푸시될 때
+  pull_request:
+    branches: [ "main" ]    # main 브랜치로 합쳐달라는 요청(PR)이 올 때
+  # paths-ignore:           # 특정 파일 수정 시에는 실행하지 않을 경우 명시
+
+# 3. 실행할 작업(Job)들의 모음
+# 각 Job은 독립적인 가상 서버 (Runner)에서 실행됨
+# 기본적으로 각 Job들은 병렬로 실행됨
+# needs: 작업간 순서를 정할 수 있음 ex) 빌드 및 테스트 -> 배포
+jobs:
+	# [1단계] 빌드 및 테스트 단계: 'build-and-test'라는 이름의 작업을 정의
+  build-and-test:
+    # 실행 환경: GitHub에서 제공하는 최신 우분투 리눅스 서버 사용. 가장 빠르고 저렴
+    runs-on: ubuntu-latest
+
+    # 작업 내부의 상세 단계(Step)
+    # 순차적인 명령 집합
+    steps:
+      # (1) 가상 서버로 내 레포지토리 코드를 내려받음 (체크아웃)
+      # uses: 깃헙(actions)에서 만든 액션 레포지토리
+      #       내 현재 레포지토리 코드를 가상 서버로 옮겨줌
+      #       owner/repo@version 형식
+      - name: Checkout source code
+        uses: actions/checkout@v4 
+
+      # (2) Node.js 환경 설치 (NestJS 실행에 필요)
+      # uses: 깃헙(actions)에서 만든 액션 레포지토리 setup-node의 v4를 가져다 쓴다는 것.
+      #       가상서버에 node 환경을 만들어 줌
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.14.0' # 프로젝트에서 사용하는 노드 버전 지정
+          cache: 'npm'            # npm 캐시를 사용하여 다음 실행 시 속도 향상
+
+      # (3) 의존성 라이브러리 설치
+      # 'npm install' 대신 'npm ci'를 권장 (package-lock.json에 명시된 버전 엄격 준수)
+      - name: Install dependencies
+        run: npm ci
+
+      # (4) 코드 스타일 검사 (Lint)
+      # 협업 시 일관된 코드 규칙을 지켰는지 확인
+      #- name: Run Lint
+      #  run: npm run lint
+
+      # (5) 테스트 코드 실행 (Unit Test)
+      # API의 기능들이 정상적으로 작동하는지 확인
+      #- name: Run Tests
+      #  run: npm run test
+
+      # (6) NestJS 빌드 테스트
+      # TypeScript 코드가 JavaScript로 에러 없이 컴파일되는지 최종 확인
+      - name: Build project
+        run: npm run build
+
+      # (7) 결과 알림 (성공 시 메시지 출력)
+      - name: Success Message
+        if: success()
+        run: echo "🚀 NestJS CI Pipeline Passed Successfully!"
+        
+        
+  # [2단계] 배포 (조건부 실행)
+  deploy:
+    # 조건 1: 앞선 'build-and-test'가 성공해야 함
+    needs: build-and-test
+    
+    # 조건 2: '이벤트'가 pull_request가 아니고, 브랜치가 main일 때만 실행
+    # 즉, PR 단계에서는 deploy를 하지 않음
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Production
+        run: echo "실제 서버로 배포를 진행합니다! 🚀"
